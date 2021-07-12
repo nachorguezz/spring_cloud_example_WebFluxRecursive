@@ -23,16 +23,14 @@ public class NodeServiceImpl implements INodeService {
     }
 
 
-    private Flux<TreeElement> addChildrenFlux(Flux<TreeElement> roots){
-        return roots.map(root -> {
-            Flux<TreeElement> childrens = nodeCrudRepository.findByParentId(Mono.just(root.getId())).map(Node::toTreeElement);
-            addChildrenFlux(childrens).subscribe(root::addTreeElement);
-            return root;
+    private Mono<TreeElement> addChildren(TreeElement parent){
+        return nodeCrudRepository.findByParentId(parent.getId()).map(Node:toTreeElement).collectList().map(children -> {
+            parent.setNodeRefs(children);
+            return parent;
         });
     }
 
     public Flux<TreeElement> getExpandedTree() {
-        Flux<TreeElement> roots = nodeCrudRepository.findAll().filter(node -> node instanceof NodeRoot).map(Node::toTreeElement);
-        return addChildrenFlux(roots);
+        return nodeCrudRepository.findAll().filter(node -> node instanceof NodeRoot).map(Node::toTreeElement).flatMap(this::addChildren);
     }
 }
