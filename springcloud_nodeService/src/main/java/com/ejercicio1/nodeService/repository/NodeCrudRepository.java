@@ -8,6 +8,6 @@ import reactor.core.publisher.Mono;
 
 public interface NodeCrudRepository extends ReactiveCrudRepository<Node, String>{
 
-    Flux<NodeDesc> findByParentId(Mono<String> parent_Id);
+    Flux<NodeDesc> findByParentId(String parent_Id);
 
 }
